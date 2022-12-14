@@ -89,6 +89,10 @@ def enumerate_ocpn(ocpn):
         for act in en_act:
             #check here
             next_state = get_next_state(ocpn, state, act)
+            #if a loop is detected do not follow that
+            trace_seq = [s[0] for s in next_state[1]]
+            if any([v>1 for v in {i:trace_seq.count(i) for i in trace_seq}.values()]):
+                continue
             next_state_string = state_to_string(next_state)
             if next_state_string not in state_hashes:
                 state_hashes.add(next_state_string)

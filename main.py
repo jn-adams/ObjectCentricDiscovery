@@ -5,11 +5,11 @@ from ocpa.algo.discovery.ocpn import algorithm as ocpn_discovery_factory
 from ocpa.visualization.oc_petri_net import factory as ocpn_vis_factory
 results = []
 for intercon in [0.18,0.19,0.20]:
-    sample_rate = 0.02
+    sample_rate = 0.05
     #generate a model
     #net = gen.generate_net(num_act=20,num_ot=5, interconnectedness=0.2)
     #things missing: Replacement of activities by choice or parallel constructs and making sure that the net is conencted(can also be  covered by high enough interconnectedness)
-    net = gen.generate_net(num_act=21,num_ot=5, interconnectedness=intercon)
+    net = gen.generate_net(num_act=19,num_ot=5, interconnectedness=intercon)
 
     #enumerate system behavior
     full_log = en.enumerate_ocpn(net)
