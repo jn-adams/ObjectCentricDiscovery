@@ -1,5 +1,5 @@
 from copy import deepcopy
-
+import time
 
 def initialize_search(ocpn):
     #A state consists of the current tokens in the different places and the sequence of previously executed activities
@@ -21,15 +21,28 @@ def get_enabled_activities(ocpn, state):
         enabled = True
         for a in t.in_arcs:
             p = a.source
-            if p.name not in state[0].keys():
+            if p.name not in state[0]:
                 enabled = False
         if enabled:
             enabled_activities.append(t.name)
 
     return enabled_activities
 
+def copy_state(state):
+    marking = state[0].copy()
+    prefix = state[1].copy()
+    new_state = (marking, prefix)
+    return new_state
+
 def get_next_state(ocpn, state, activity):
-    new_state = deepcopy(state)
+    time_cp = 0
+    time_dcp = 0
+    ti = time.time()
+    #new_state = deepcopy(state)
+    time_dcp += time.time() - ti
+    ti = time.time()
+    new_state = copy_state(state)
+    time_cp += time.time() - ti
     for t in ocpn.transitions:
         if t.name == activity:
             #store whihc tokens of which type in in places
@@ -59,7 +72,7 @@ def get_next_state(ocpn, state, activity):
                 objects = tuple([tuple(o) for o in objects])
                 new_state[1].append((activity,objects))
             break
-    return new_state
+    return new_state, time_cp, time_dcp
 
 def state_to_string(state):
     state_string = ""
@@ -75,6 +88,9 @@ def store_trace(state, num_of_traces):
     return tuple(stored_trace)
 
 def enumerate_ocpn(ocpn):
+    time_en = 0
+    time_next = 0
+    time_string = 0
     initial_state = initialize_search(ocpn)
     trace_set = set()
     state_hashes = set()
@@ -84,19 +100,30 @@ def enumerate_ocpn(ocpn):
     dfs = 0
     while dfs < len(state_queue):
         state=state_queue[dfs]
+        # ti = time.time()
         en_act= get_enabled_activities(ocpn, state)
+        # time_en += time.time()-ti
         #print(en_act)
         for act in en_act:
             #check here
-            next_state = get_next_state(ocpn, state, act)
+            # ti = time.time()
+            next_state, time_cp, time_dcp = get_next_state(ocpn, state, act)
+            # time_next += time.time() - ti
+
             #if a loop is detected do not follow that
             trace_seq = [s[0] for s in next_state[1]]
-            if any([v>1 for v in {i:trace_seq.count(i) for i in trace_seq}.values()]):
+            if len(set(trace_seq))< len(trace_seq):
                 continue
-            next_state_string = state_to_string(next_state)
-            if next_state_string not in state_hashes:
-                state_hashes.add(next_state_string)
-                state_queue.append(next_state)
+            #if any([v>1 for v in {i:trace_seq.count(i) for i in trace_seq}.values()]):
+            #    continue
+            # ti = time.time()
+            # next_state_string = state_to_string(next_state)
+            # time_string += time.time() - ti
+            # if next_state_string not in state_hashes:
+            #     state_hashes.add(next_state_string)
+            #     state_queue.append(next_state)
+            state_queue.append(next_state)
+
         #print(state_queue)
 
         if len(en_act) == 0:
@@ -104,5 +131,8 @@ def enumerate_ocpn(ocpn):
         dfs+=1
         if dfs % 1000 == 0:
             print(dfs)
+    #print("enabled time "+str(time_en))
+    #print("state time " + str(time_next))
+    #print("string time " + str(time_string))
 
     return trace_set
