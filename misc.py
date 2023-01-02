@@ -7,7 +7,8 @@ import ocpa.objects.log.converter.versions.df_to_ocel as obj_converter
 import ocpa.objects.log.importer.csv.versions.to_df as df_importer
 import ocpa.objects.log.variants.util.table as table_utils
 def sample_log(log, ratio):
-    return random.sample(log,int(ratio*len(log)))
+    random.seed(1)
+    return random.sample(log,max(1,int(ratio*len(log))))
 
 def to_OCEL(log):
     dict_list= []
@@ -27,7 +28,7 @@ def to_OCEL(log):
             dict_list.append(event_dict)
     df = pd.DataFrame(dict_list)
     df = df.applymap(lambda d: set() if pd.isnull(d) else d)
-    print(df)
+    #print(df)
     parameters = {"obj_names": ots,
                   "val_names": [],
                   "act_name": "event_activity",
@@ -67,7 +68,7 @@ def flatten_ocel(ocel):
         counter += 1
     df = pd.DataFrame(dict_list)
     df = df.applymap(lambda d: set() if pd.isnull(d) else d)
-    print(df)
+    #print(df)
     parameters = {"obj_names": ["pexec"],
                   "val_names": [],
                   "act_name": "event_activity",
