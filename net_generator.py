@@ -12,8 +12,8 @@ from enum import Enum
 
 import itertools
 
-import copy
 
+import copy
 import random
 from ocpa.objects.oc_petri_net.obj import ObjectCentricPetriNet as OCPN
 from ocpa.visualization.oc_petri_net import factory as ocpn_vis_factory
@@ -28,7 +28,8 @@ def get_timespot_activities(labels_act):
     #Edited By Jari
     #dictionary with the original spot activities have on "the timeline"
     #Changed with a plus one because of start activity
-    return dict([(labels_act[i], i) for i in range(0, len(labels_act))])
+    return dict([(labels_act[i], i+1) for i in range(0, len(labels_act))])
+
 
 
 def get_labels_objecttypes(num_obj):
@@ -53,12 +54,14 @@ def get_object_types_for_all_activties(labels_act, labels_obj, chance_overlap):
     types_act["end"] = set(labels_obj)
     return types_act
 
+
 def get_digit_withexception(label, integer): #function to extract the number, not necessary but easier to match places and transitions
     digit = ''.join(c for c in label if c.isdigit())
     if digit == '':
         return str(integer)
     else:
         return digit
+
 
 def create_places_activity(label_act, objects_act, timespots):
     #place is here tuple (Name, object_type, timespot of transition it follows)
@@ -170,6 +173,7 @@ def add_XORs(transitions, places, arcs, chance_add_split, reduce_chance=True):
 
 
 
+
 def get_matching_places_arcs_and(curr_tr,transitions, places, arcs):
     place_in, place_out = get_previous_and_next_place(curr_tr, places, arcs)
     arc_in = [a for a in arcs if a[1] == curr_tr[0]][0]
@@ -259,7 +263,6 @@ def generate_net(num_act, num_ot, interconnectedness, chance_add_AND, chance_add
     #(transitions, places, arcs) = add_ANDs(transitions, places, arcs, chance_add_AND, reduce_chance=True)
     print('adding XORs')
     (transitions, places, arcs) = add_XORs(transitions, places, arcs, chance_add_XOR, reduce_chance=True)
-   
     transition_dict = {t[0]: OCPN.Transition(t[0]) for t in transitions}
     place_dict = {p[0]:OCPN.Place(p[0],p[1]) for p in places}
     arc_dict = {(source,target):OCPN.Arc(transition_dict[source] if source in transition_dict.keys() else place_dict[source], transition_dict[target] if target in transition_dict.keys() else place_dict[target]) for (source,target) in arcs}
@@ -282,8 +285,7 @@ def generate_net(num_act, num_ot, interconnectedness, chance_add_AND, chance_add
         p.out_arcs = [arc_dict[(source, target)] for (source, target) in arc_dict.keys() if source == p.name]
     arcs_ocpn = list(arc_dict.values())
     transitions_ocpn = list(transition_dict.values())
-    
-    
+
     model = OCPN(name="Test",places = places_ocpn, transitions=transitions_ocpn,arcs=arcs_ocpn )
     gviz = ocpn_vis_factory.apply(model, parameters={'format': 'svg'})
     ocpn_vis_factory.view(gviz)
