@@ -306,8 +306,8 @@ def generate_net(num_act, num_ot, interconnectedness, chance_add_AND, chance_add
     arcs_ocpn = list(arc_dict.values())
     transitions_ocpn = list(transition_dict.values())
     model = OCPN(name="Test",places = places_ocpn, transitions=transitions_ocpn,arcs=arcs_ocpn )
-    #gviz = ocpn_vis_factory.apply(model, parameters={'format': 'svg'})
-    #ocpn_vis_factory.view(gviz)
+    gviz = ocpn_vis_factory.apply(model, parameters={'format': 'svg'})
+    ocpn_vis_factory.view(gviz)
     return model
 
 #generate_net(10,2,0.1,0.4,0.4)

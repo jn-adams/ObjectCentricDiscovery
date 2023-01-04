@@ -11,11 +11,11 @@ results = []
 for intercon in [0.25]:
     for sample_rate in [0.02]:
         for num_ot in [2]:
-            for num_act in [6]:
+            for num_act in [5]:
                 #generate a model
                 #net = gen.generate_net(num_act=20,num_ot=5, interconnectedness=0.2)
                 #things missing: Replacement of activities by choice or parallel constructs and making sure that the net is conencted(can also be  covered by high enough interconnectedness)
-                net = gen.generate_net(num_act=num_act,num_ot=num_ot, interconnectedness=intercon, chance_add_AND=0.2, chance_add_XOR=0.5)
+                net = gen.generate_net(num_act=num_act,num_ot=num_ot, interconnectedness=intercon, chance_add_AND=0.1, chance_add_XOR=0.3)
 
                 #enumerate system behavior
                 full_log = en.enumerate_ocpn(net)
@@ -45,8 +45,8 @@ for intercon in [0.25]:
                 flat_ocel = misc.flatten_ocel(ocel)
                 print(len(flat_ocel.process_executions))
                 ocpn = ocpn_discovery_factory.apply(flat_ocel, parameters={"debug": False})
-                #gviz = ocpn_vis_factory.apply(ocpn, parameters={'format': 'svg'})
-                #ocpn_vis_factory.view(gviz)
+                gviz = ocpn_vis_factory.apply(ocpn, parameters={'format': 'svg'})
+                ocpn_vis_factory.view(gviz)
                 full_flat_log = en.enumerate_ocpn(ocpn)
                 fitness_flat, precision_flat = misc.compare_languages(full_log, full_flat_log)
                 print(fitness_flat)
