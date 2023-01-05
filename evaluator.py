@@ -5,8 +5,8 @@ from ocpa.algo.discovery.ocpn import algorithm as ocpn_discovery_factory
 from ocpa.visualization.oc_petri_net import factory as ocpn_vis_factory
 import get_stats as stats
 
-def eval_params(intercon, sample_rate, num_ot, num_act):
-    #(intercon, sample_rate, num_ot, num_act) = params
+def eval_params(params):
+    (intercon, sample_rate, num_ot, num_act) = params
     # generate a model
     # net = gen.generate_net(num_act=20,num_ot=5, interconnectedness=0.2)
     # things missing: Replacement of activities by choice or parallel constructs and making sure that the net is conencted(can also be  covered by high enough interconnectedness)
