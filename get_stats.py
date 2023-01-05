@@ -1,4 +1,5 @@
 #recale interconnectivity
+import math
 
 from ocpa.objects.oc_petri_net.obj import ObjectCentricPetriNet as OCPN
 
@@ -46,15 +47,68 @@ def get_model_per_object(ocpn):
         nets_list.append(objnet)
     return nets_list
 
+
+def get_ot_elements(ocpn, ot):
+    places = [(p.name,ot) for p in ocpn.places if p.object_type == ot]
+    transitions = [(t.name,) for t in ocpn.transitions if any([p.object_type == ot for p in t.preset])]
+    place_list = [x[0] for x in places]
+    t_list = [x[0] for x in transitions]
+    arcs = [(a.source.name, a.target.name) for a in ocpn.arcs if a.source.name in place_list and a.target.name in t_list or  a.source.name in t_list and a.target.name in place_list]
+
+    return (transitions,places,arcs)
+
+
+
+def get_model_per_object_fixed(ocpn):
+    obj_types = ocpn.object_types
+    nets = {}
+    for obj in obj_types:
+        (transitions, places, arcs) = get_ot_elements(ocpn, obj)
+
+        transition_dict = {t[0]: OCPN.Transition(t[0]) for t in transitions}
+        place_dict = {p[0]: OCPN.Place(p[0], p[1]) for p in places}
+        arc_dict = {(source, target): OCPN.Arc(
+            transition_dict[source] if source in transition_dict.keys() else place_dict[source],
+            transition_dict[target] if target in transition_dict.keys() else place_dict[target]) for (source, target) in
+                    arcs}
+        transition_dict = {t[0]: OCPN.Transition(t[0], in_arcs=[arc_dict[(source, target)] for (source, target) in
+                                                                arc_dict.keys() if target == t[0]],
+                                                 out_arcs=[arc_dict[(source, target)] for (source, target) in
+                                                           arc_dict.keys() if source == t[0]]) for t in transitions}
+        # update arc dict
+        for (source, target) in arc_dict.keys():
+            if source in transition_dict.keys():
+                arc_dict[(source, target)].source = transition_dict[source]
+            else:
+                arc_dict[(source, target)].source = place_dict[source]
+
+            if target in transition_dict.keys():
+                arc_dict[(source, target)].target = transition_dict[target]
+            else:
+                arc_dict[(source, target)].target = place_dict[target]
+
+        places_ocpn = list(place_dict.values())
+        for p in places_ocpn:
+            p.in_arcs = [arc_dict[(source, target)] for (source, target) in arc_dict.keys() if target == p.name]
+            p.out_arcs = [arc_dict[(source, target)] for (source, target) in arc_dict.keys() if source == p.name]
+        arcs_ocpn = list(arc_dict.values())
+        transitions_ocpn = list(transition_dict.values())
+        model = OCPN(name="Test", places=places_ocpn, transitions=transitions_ocpn, arcs=arcs_ocpn)
+        gviz = ocpn_vis_factory.apply(model, parameters={'format': 'svg'})
+        ocpn_vis_factory.view(gviz)
+        nets[obj]=model
+    return nets
+
 def get_complexity_per_object(ocpn):
-    models = get_model_per_object(ocpn)
-    amount_traces = []
-    for model in models:
-        
+    models = get_model_per_object_fixed(ocpn)
+    trace_share = {}
+    for ot in models.keys():
+        model = models[ot]
         #this is where it goes wrong: as far as I can see the models per object are nicely defined. 
         #The only problem is that the enumration always gives an empty set
-
-        amount_traces.append(len(en.enumerate_ocpn(model)))
-    return sum(amount_traces)/len(amount_traces)
+        amount_traces = len(en.enumerate_ocpn(model))
+        max_possible_traces = math.factorial(len(model.transitions)-2)
+        trace_share[ot] = amount_traces/max_possible_traces
+    return trace_share
 
 

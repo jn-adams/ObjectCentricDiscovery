@@ -3,6 +3,8 @@ import net_enumerator as en
 import misc as misc
 from ocpa.algo.discovery.ocpn import algorithm as ocpn_discovery_factory
 from ocpa.visualization.oc_petri_net import factory as ocpn_vis_factory
+import get_stats as stats
+import pandas as pd
 results = []
 # for intercon in [0.3,0.4,0.5]:
 #     for sample_rate in [0.01,0.02,0.05,0.1,0.2]:
@@ -16,7 +18,8 @@ for intercon in [0.25]:
                 #net = gen.generate_net(num_act=20,num_ot=5, interconnectedness=0.2)
                 #things missing: Replacement of activities by choice or parallel constructs and making sure that the net is conencted(can also be  covered by high enough interconnectedness)
                 net = gen.generate_net(num_act=num_act,num_ot=num_ot, interconnectedness=intercon, chance_add_AND=0.1, chance_add_XOR=0.3)
-
+                complexity = stats.get_complexity_per_object(net)
+                interconnectedness = stats.get_interconnectivity(net,False)
                 #enumerate system behavior
                 full_log = en.enumerate_ocpn(net)
                 print(len(full_log))
@@ -51,15 +54,21 @@ for intercon in [0.25]:
                 fitness_flat, precision_flat = misc.compare_languages(full_log, full_flat_log)
                 print(fitness_flat)
                 print(precision_flat)
-                results.append(
-                    {
-                     "interconnectedness":intercon,
+                res_dict = {
+                     "interconnectedness":interconnectedness,
                      "number object types":num_ot,
-                     "number activities": num_act,
-                     "sample_rate" :sample_rate,
+                     "number activities": len(net.transitions),
+                     "sample_rate" :len(ocel.process_executions)/len(full_log),
                      "fitness_ocpn":fitness,
                      "precision_ocpn": precision,
                      "fitness_flat":fitness_flat,
                      "precision_flat": precision_flat}
-                )
+
+                sum_complexity = []
+                for ot in net.object_types:
+                    res_dict["completeness_"+ot] = complexity[ot]
+                    sum_complexity.append(complexity[ot])
+                res_dict["completeness"] = sum(sum_complexity)/len(sum_complexity)
+                results.append(res_dict)
 print(results)
+pd.DataFrame(results).to_csv("results.csv", index = False)
