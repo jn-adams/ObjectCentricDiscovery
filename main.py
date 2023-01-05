@@ -6,14 +6,14 @@ import tqdm
 import warnings
 warnings.filterwarnings("ignore")
 results = []
-# intercon_range = [0,0.15,0.25,0.35]
-# sample_range = [0.001,0.005,0.01,0.02,0.03,0.05,0.1]
-# num_ot_range = [2,3,4]
-# num_act_range = [2,3,4,5,6,7]
-intercon_range = [0.1,0.3,0.5]
-sample_range = [0.001,0.01]
-num_ot_range = [2,3]
-num_act_range = [2,3,4]
+intercon_range = [0,0.15,0.25,0.35]
+sample_range = [0.001,0.005,0.01,0.02,0.03,0.05,0.1]
+num_ot_range = [2,3,4]
+num_act_range = [2,3,4,5,6,7]
+# intercon_range = [0.1,0.3,0.5]
+# sample_range = [0.001,0.01]
+# num_ot_range = [2,3]
+# num_act_range = [2,3,4]
 parameter_space = list(itertools.product(intercon_range,sample_range,num_ot_range,num_act_range))
 
 
