@@ -18,38 +18,38 @@ def eval_params(intercon, sample_rate, num_ot, num_act):
     full_log = en.enumerate_ocpn(net)
     if len(full_log) == 0:
         return {}
-    print(len(full_log))
+    #print(len(full_log))
 
     # generate an event log from the model
     log = misc.sample_log(full_log, ratio=sample_rate)
     ocel = misc.to_OCEL(log)
 
-    print(len(ocel.process_executions))
+    #print(len(ocel.process_executions))
     # discover ocpn
     ocpn = ocpn_discovery_factory.apply(ocel, parameters={"debug": False})
-    gviz = ocpn_vis_factory.apply(ocpn, parameters={'format': 'svg'})
-    ocpn_vis_factory.view(gviz)
+    #gviz = ocpn_vis_factory.apply(ocpn, parameters={'format': 'svg'})
+    #ocpn_vis_factory.view(gviz)
 
     # fitness of ocpn to model
     full_model_log = en.enumerate_ocpn(ocpn)
     if len(full_model_log) == 0:
         return {}
     fitness, precision = misc.compare_languages(full_log, full_model_log)
-    print(fitness)
-    print(precision)
+    #print(fitness)
+    #print(precision)
 
     # fitness of pn to model
     flat_ocel = misc.flatten_ocel(ocel)
-    print(len(flat_ocel.process_executions))
+    #print(len(flat_ocel.process_executions))
     ocpn = ocpn_discovery_factory.apply(flat_ocel, parameters={"debug": False})
-    gviz = ocpn_vis_factory.apply(ocpn, parameters={'format': 'svg'})
-    ocpn_vis_factory.view(gviz)
+    #gviz = ocpn_vis_factory.apply(ocpn, parameters={'format': 'svg'})
+    #ocpn_vis_factory.view(gviz)
     full_flat_log = en.enumerate_ocpn(ocpn)
     if len(full_log) == 0:
         return {}
     fitness_flat, precision_flat = misc.compare_languages(full_log, full_flat_log)
-    print(fitness_flat)
-    print(precision_flat)
+    #print(fitness_flat)
+    #print(precision_flat)
     res_dict = {
         "interconnectedness": interconnectedness,
         "number object types": num_ot,

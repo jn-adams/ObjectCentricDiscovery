@@ -131,8 +131,8 @@ def enumerate_ocpn(ocpn):
         if len(en_act) == 0:
             trace_set.add(store_trace(state, len(trace_set)))#tuple(state[1]))
         dfs+=1
-        if dfs % 1000 == 0:
-            print(dfs)
+        #if dfs % 1000 == 0:
+        #    print(dfs)
     #print("enabled time "+str(time_en))
     #print("state time " + str(time_next))
     #print("string time " + str(time_string))

@@ -173,7 +173,7 @@ def add_XORs(transitions, places, arcs, chance_add_split, reduce_chance=True):
 
 
 def get_matching_places_arcs_and(curr_tr,transitions, places, arcs):
-    print(curr_tr)
+    #print(curr_tr)
     place_in, place_out = get_previous_and_next_place(curr_tr, places, arcs)
     arc_in = [a for a in arcs if a[1] == curr_tr[0]][0]
     arc_out = [a for a in arcs if a[0] == curr_tr[0]][0]
@@ -274,14 +274,14 @@ def add_ANDs(transitions, places, arcs, chance_add_split, reduce_chance=True):
 def generate_net(num_act, num_ot, interconnectedness, chance_add_AND, chance_add_XOR):
     #random.seed(2)
     (transitions, places, arcs) = get_simple_net(num_act, num_ot, interconnectedness)
-    print('adding ANDs')
+    #print('adding ANDs')
     (transitions, places, arcs) = add_ANDs(transitions, places, arcs, chance_add_AND, reduce_chance=True)
-    print('adding XORs')
+    #print('adding XORs')
     (transitions, places, arcs) = add_XORs(transitions, places, arcs, chance_add_XOR, reduce_chance=True)
     
-    print(transitions)
-    print(places)
-    print(arcs)
+    #print(transitions)
+    #print(places)
+    #print(arcs)
     
     transition_dict = {t[0]: OCPN.Transition(t[0]) for t in transitions}
     place_dict = {p[0]:OCPN.Place(p[0],p[1]) for p in places}
@@ -306,8 +306,8 @@ def generate_net(num_act, num_ot, interconnectedness, chance_add_AND, chance_add
     arcs_ocpn = list(arc_dict.values())
     transitions_ocpn = list(transition_dict.values())
     model = OCPN(name="Test",places = places_ocpn, transitions=transitions_ocpn,arcs=arcs_ocpn )
-    gviz = ocpn_vis_factory.apply(model, parameters={'format': 'svg'})
-    ocpn_vis_factory.view(gviz)
+    #gviz = ocpn_vis_factory.apply(model, parameters={'format': 'svg'})
+    #ocpn_vis_factory.view(gviz)
     return model
 
 #generate_net(10,2,0.1,0.4,0.4)
