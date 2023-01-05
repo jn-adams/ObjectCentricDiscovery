@@ -99,6 +99,8 @@ def enumerate_ocpn(ocpn):
     state_queue.append(initial_state)
     dfs = 0
     while dfs < len(state_queue):
+        if dfs >=4000000:
+            return set()
         state=state_queue[dfs]
         # ti = time.time()
         en_act= get_enabled_activities(ocpn, state)
