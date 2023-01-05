@@ -45,7 +45,7 @@ def eval_params(params):
     #gviz = ocpn_vis_factory.apply(ocpn, parameters={'format': 'svg'})
     #ocpn_vis_factory.view(gviz)
     full_flat_log = en.enumerate_ocpn(ocpn)
-    if len(full_log) == 0:
+    if len(full_flat_log) == 0:
         return {}
     fitness_flat, precision_flat = misc.compare_languages(full_log, full_flat_log)
     #print(fitness_flat)
