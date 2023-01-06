@@ -99,7 +99,7 @@ def enumerate_ocpn(ocpn):
     state_queue.append(initial_state)
     dfs = 0
     while dfs < len(state_queue):
-        if dfs >=4000000:
+        if dfs >=400000:
             return set()
         state=state_queue[dfs]
         # ti = time.time()

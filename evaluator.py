@@ -6,12 +6,14 @@ from ocpa.visualization.oc_petri_net import factory as ocpn_vis_factory
 import get_stats as stats
 
 def eval_params(params):
-    (intercon, sample_rate, num_ot, num_act) = params
+    (intercon, sample_rate, num_ot, num_act,chance_and,chance_xor) = params
     # generate a model
     # net = gen.generate_net(num_act=20,num_ot=5, interconnectedness=0.2)
     # things missing: Replacement of activities by choice or parallel constructs and making sure that the net is conencted(can also be  covered by high enough interconnectedness)
-    net = gen.generate_net(num_act=num_act, num_ot=num_ot, interconnectedness=intercon, chance_add_AND=0.1,
-                           chance_add_XOR=0.3)
+    net = gen.generate_net(num_act=num_act, num_ot=num_ot, interconnectedness=intercon, chance_add_AND=chance_and,
+                           chance_add_XOR=chance_xor)
+    if len([t for t in net.transitions if not t.silent]) > 9:
+        return {}
     complexity = stats.get_complexity_per_object(net)
     interconnectedness = stats.get_interconnectivity(net, False)
     # enumerate system behavior
