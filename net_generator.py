@@ -173,7 +173,6 @@ def add_XORs(transitions, places, arcs, chance_add_split, reduce_chance=True):
 
 
 def get_matching_places_arcs_and(curr_tr,transitions, places, arcs):
-    #print(curr_tr)
     place_in, place_out = get_previous_and_next_place(curr_tr, places, arcs)
     arc_in = [a for a in arcs if a[1] == curr_tr[0]][0]
     arc_out = [a for a in arcs if a[0] == curr_tr[0]][0]
@@ -201,10 +200,10 @@ def add_AND(transitions, places, arcs, chance_add_split, transition, reduce_chan
             transitions.insert(i+3, tr_join)
     #AND so we need to replace the places
     pl_split = (pl_in[0]+'-split', pl_in[1], pl_in[2])
-    pl_in1 = (pl_in[0]+'-1', pl_in[1], pl_in[2])
-    pl_in2 = (pl_in[0]+'-2', pl_in[1], pl_in[2])
-    pl_out1 = (pl_out[0]+'-1', pl_in[1], pl_in[2])
-    pl_out2 = (pl_out[0]+'-2', pl_in[1], pl_in[2])
+    pl_in1 = (pl_in[0]+'-split-1', pl_in[1], pl_in[2])
+    pl_in2 = (pl_in[0]+'-split-2', pl_in[1], pl_in[2])
+    pl_out1 = (pl_in[0]+'-join-1', pl_in[1], pl_in[2])
+    pl_out2 = (pl_in[0]+'-join-2', pl_in[1], pl_in[2])
     pl_join = (pl_out[0], pl_out[1], pl_out[2])
  
     for i in range(0, len(places)):
@@ -274,15 +273,8 @@ def add_ANDs(transitions, places, arcs, chance_add_split, reduce_chance=True):
 def generate_net(num_act, num_ot, interconnectedness, chance_add_AND, chance_add_XOR):
     #random.seed(2)
     (transitions, places, arcs) = get_simple_net(num_act, num_ot, interconnectedness)
-    #print('adding ANDs')
     (transitions, places, arcs) = add_ANDs(transitions, places, arcs, chance_add_AND, reduce_chance=True)
-    #print('adding XORs')
     (transitions, places, arcs) = add_XORs(transitions, places, arcs, chance_add_XOR, reduce_chance=True)
-    
-    #print(transitions)
-    #print(places)
-    #print(arcs)
-    
     transition_dict = {t[0]: OCPN.Transition(t[0]) for t in transitions}
     place_dict = {p[0]:OCPN.Place(p[0],p[1]) for p in places}
     arc_dict = {(source,target):OCPN.Arc(transition_dict[source] if source in transition_dict.keys() else place_dict[source], transition_dict[target] if target in transition_dict.keys() else place_dict[target]) for (source,target) in arcs}
@@ -310,5 +302,4 @@ def generate_net(num_act, num_ot, interconnectedness, chance_add_AND, chance_add
     #ocpn_vis_factory.view(gviz)
     return model
 
-#generate_net(10,2,0.1,0.4,0.4)
 
