@@ -12,13 +12,14 @@ def eval_params(params):
     # things missing: Replacement of activities by choice or parallel constructs and making sure that the net is conencted(can also be  covered by high enough interconnectedness)
     net = gen.generate_net(num_act=num_act, num_ot=num_ot, interconnectedness=intercon, chance_add_AND=chance_and,
                            chance_add_XOR=chance_xor)
-    if len([t for t in net.transitions if not t.silent]) > 9:
+    if len([t for t in net.transitions if not t.silent]) > 11:
         return {}
     complexity = stats.get_complexity_per_object(net)
     interconnectedness = stats.get_interconnectivity(net, False)
     # enumerate system behavior
     full_log = en.enumerate_ocpn(net)
-    if len(full_log) == 0:
+    #if there is only one trace in the model dont use it
+    if len(full_log) <= 1:
         return {}
     #print(len(full_log))
 
