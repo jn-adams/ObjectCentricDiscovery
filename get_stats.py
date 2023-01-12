@@ -109,6 +109,7 @@ def get_complexity_per_object(ocpn):
         amount_traces = len(en.enumerate_ocpn(model))
         max_possible_traces = math.factorial(len(model.transitions)-2)
         trace_share[ot] = amount_traces/max_possible_traces
+        trace_share[ot+"_act"] =  len([t for t in model.transitions if not t.silent])
     return trace_share
 
 

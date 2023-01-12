@@ -69,3 +69,36 @@ def eval_params(params):
         sum_complexity.append(complexity[ot])
     res_dict["completeness"] = sum(sum_complexity) / len(sum_complexity)
     return res_dict
+
+
+def generate_example_models(params_list,interc_vals,con_vals,epsilon_i,epsilon_c):
+    return_dict = {}
+    for params in params_list:
+        (intercon, sample_rate, num_ot, num_act, chance_and, chance_xor) = params
+        net = gen.generate_net(num_act=num_act, num_ot=num_ot, interconnectedness=intercon, chance_add_AND=chance_and,
+                               chance_add_XOR=chance_xor)
+        if len([t for t in net.transitions if not t.silent]) != 12:
+            continue
+        interconnectedness = stats.get_interconnectivity(net, False)
+        for i_val in interc_vals:
+            if i_val - epsilon_i < interconnectedness and i_val + epsilon_i > interconnectedness:
+                sum_complexity= []
+                complexity_d = stats.get_complexity_per_object(net)
+                model_too_small = False
+                for ot in net.object_types:
+                    sum_complexity.append(complexity_d[ot])
+                    if complexity_d[ot+"_act"] < 6:
+                        model_too_small = True
+                if model_too_small:
+                    continue
+                complexity = sum(sum_complexity) / len(sum_complexity)
+
+
+                for c_val in con_vals:
+                    if c_val - epsilon_c < complexity and c_val + epsilon_c > complexity:
+                        return_dict[(i_val,c_val)] = net
+                        print(complexity_d)
+                        print((i_val,c_val))
+
+
+    return return_dict
