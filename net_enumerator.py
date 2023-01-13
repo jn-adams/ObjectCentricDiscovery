@@ -85,6 +85,14 @@ def store_trace(state, num_of_traces):
     stored_trace = []
     for event in state[1]:
         stored_trace.append( (event[0] , tuple([(ot, tuple([o_x+str(num_of_traces) for o_x in o])) for (ot, o) in event[1]]) ) )
+    #print(stored_trace)
+    return tuple(stored_trace)
+
+def store_trace_trace_aware(state):
+    stored_trace = []
+    for event in state[1]:
+        stored_trace.append( (event[0] , tuple([(ot, tuple([o_x for o_x in o])) for (ot, o) in event[1]]) ) )
+    #print(stored_trace)
     return tuple(stored_trace)
 
 def enumerate_ocpn(ocpn):
@@ -93,13 +101,14 @@ def enumerate_ocpn(ocpn):
     time_string = 0
     initial_state = initialize_search(ocpn)
     trace_set = set()
+    trace_set_only_traces = set()
     state_hashes = set()
     #could be extended with acheck for already added
     state_queue = []
     state_queue.append(initial_state)
     dfs = 0
     while dfs < len(state_queue):
-        if dfs >=4000000:
+        if dfs >=1000000:
             return set()
         state=state_queue[dfs]
         # ti = time.time()
@@ -129,12 +138,15 @@ def enumerate_ocpn(ocpn):
         #print(state_queue)
 
         if len(en_act) == 0:
-            trace_set.add(store_trace(state, len(trace_set)))#tuple(state[1]))
+            trace_object_agnostic = store_trace_trace_aware(state)
+            if trace_object_agnostic not in trace_set_only_traces:
+                trace_set_only_traces.add(trace_object_agnostic)
+                trace_set.add(store_trace(state, len(trace_set)))#tuple(state[1]))
         dfs+=1
         #if dfs % 1000 == 0:
         #    print(dfs)
     #print("enabled time "+str(time_en))
     #print("state time " + str(time_next))
     #print("string time " + str(time_string))
-
+    #print(len(trace_set))
     return trace_set
