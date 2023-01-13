@@ -12,15 +12,18 @@ def eval_params(params):
     # things missing: Replacement of activities by choice or parallel constructs and making sure that the net is conencted(can also be  covered by high enough interconnectedness)
     net = gen.generate_net(num_act=num_act, num_ot=num_ot, interconnectedness=intercon, chance_add_AND=chance_and,
                            chance_add_XOR=chance_xor)
-    if len([t for t in net.transitions if not t.silent]) > 11:
+    if len([t for t in net.transitions if not t.silent]) > 12:
         return {}
     complexity = stats.get_complexity_per_object(net)
+    for ot in net.object_types:
+        if complexity[ot + "_act"] < 6:
+            return {}
     interconnectedness = stats.get_interconnectivity(net, False)
     # enumerate system behavior
     full_log = en.enumerate_ocpn(net)
     #if there is only one trace in the model dont use it
-    if len(full_log) <= 1:
-        return {}
+    #####if len(full_log) <= 1:
+    #####    return {}
     #print(len(full_log))
 
     # generate an event log from the model
@@ -77,7 +80,7 @@ def generate_example_models(params_list,interc_vals,con_vals,epsilon_i,epsilon_c
         (intercon, sample_rate, num_ot, num_act, chance_and, chance_xor) = params
         net = gen.generate_net(num_act=num_act, num_ot=num_ot, interconnectedness=intercon, chance_add_AND=chance_and,
                                chance_add_XOR=chance_xor)
-        if len([t for t in net.transitions if not t.silent]) != 12:
+        if len([t for t in net.transitions if not t.silent]) > 12:
             continue
         interconnectedness = stats.get_interconnectivity(net, False)
         for i_val in interc_vals:
