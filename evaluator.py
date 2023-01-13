@@ -15,17 +15,17 @@ def eval_params(params):
     if len([t for t in net.transitions if not t.silent]) > 12:
         return {}
     complexity = stats.get_complexity_per_object(net)
+    print(complexity)
     for ot in net.object_types:
         if complexity[ot + "_act"] < 6:
             return {}
     interconnectedness = stats.get_interconnectivity(net, False)
     # enumerate system behavior
     full_log = en.enumerate_ocpn(net)
-    #if there is only one trace in the model dont use it
-    #####if len(full_log) <= 1:
-    #####    return {}
+    #if there is an error in generating the log return empty
+    if len(full_log) < 1:
+        return {}
     #print(len(full_log))
-
     # generate an event log from the model
     log = misc.sample_log(full_log, ratio=sample_rate)
     ocel = misc.to_OCEL(log)
