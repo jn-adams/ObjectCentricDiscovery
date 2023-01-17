@@ -12,12 +12,12 @@ def eval_params(params):
     # things missing: Replacement of activities by choice or parallel constructs and making sure that the net is conencted(can also be  covered by high enough interconnectedness)
     net = gen.generate_net(num_act=num_act, num_ot=num_ot, interconnectedness=intercon, chance_add_AND=chance_and,
                            chance_add_XOR=chance_xor)
-    if len([t for t in net.transitions if not t.silent]) > 12:
+    if len([t for t in net.transitions if not t.silent]) > 8:
         return {}
     complexity = stats.get_complexity_per_object(net)
-    print(complexity)
+    #print(complexity)
     for ot in net.object_types:
-        if complexity[ot + "_act"] < 6:
+        if complexity[ot + "_act"] < 4:
             return {}
     interconnectedness = stats.get_interconnectivity(net, False)
     # enumerate system behavior
@@ -59,7 +59,7 @@ def eval_params(params):
     res_dict = {
         "interconnectedness": interconnectedness,
         "number object types": num_ot,
-        "number activities": len(net.transitions),
+        "number activities": len([t for t in net.transitions if not t.silent]),
         "sample_rate": len(ocel.process_executions) / len(full_log),
         "fitness_ocpn": fitness,
         "precision_ocpn": precision,

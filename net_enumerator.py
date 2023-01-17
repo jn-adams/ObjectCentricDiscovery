@@ -1,5 +1,6 @@
 from copy import deepcopy
 import time
+from sys import getsizeof
 
 def initialize_search(ocpn):
     #A state consists of the current tokens in the different places and the sequence of previously executed activities
@@ -149,4 +150,9 @@ def enumerate_ocpn(ocpn):
     #print("state time " + str(time_next))
     #print("string time " + str(time_string))
     #print(len(trace_set))
+    if dfs >40000:
+        print(dfs)
+        print(getsizeof(state_queue))
+        print(getsizeof(trace_set))
+        print(getsizeof(trace_set_only_traces))
     return trace_set
