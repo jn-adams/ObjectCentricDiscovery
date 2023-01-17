@@ -24,7 +24,7 @@ def eval_params(params):
     full_log = en.enumerate_ocpn(net)
     #if there is an error in generating the log return empty
     if len(full_log) < 1:
-        return {}
+        return {"number activities": -1}
     #print(len(full_log))
     # generate an event log from the model
     log = misc.sample_log(full_log, ratio=sample_rate)
@@ -39,7 +39,7 @@ def eval_params(params):
     # fitness of ocpn to model
     full_model_log = en.enumerate_ocpn(ocpn)
     if len(full_model_log) == 0:
-        return {}
+        return {"number activities": -1}
     fitness, precision = misc.compare_languages(full_log, full_model_log)
     #print(fitness)
     #print(precision)
@@ -52,7 +52,7 @@ def eval_params(params):
     #ocpn_vis_factory.view(gviz)
     full_flat_log = en.enumerate_ocpn(ocpn)
     if len(full_flat_log) == 0:
-        return {}
+        return {"number activities": -1}
     fitness_flat, precision_flat = misc.compare_languages(full_log, full_flat_log)
     #print(fitness_flat)
     #print(precision_flat)
