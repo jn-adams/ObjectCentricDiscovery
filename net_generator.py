@@ -114,23 +114,24 @@ def get_simple_net(num_act, num_obj, chance_overlap):
 def get_full_digit(label):
     return ''.join(c for c in label if (c.isdigit() or c=='-'))
 
-def get_previous_and_next_place(tr, places, arcs):
-    label_in = [a for a in arcs if a[1] == tr[0]][0][0]
-    label_out = [a for a in arcs if a[0] == tr[0]][0][1]
-    pl_in = [p for p in places if p[0] == label_in][0]
-    pl_out = [p for p in places if p[0] == label_out][0]
+def get_previous_and_next_places(tr, places, arcs):
+    labels_in = [a[0] for a in arcs if a[1] == tr[0]]
+    labels_out = [a[1] for a in arcs if a[0] == tr[0]]
+    pl_in = [p for p in places if p[0] in labels_in]
+    pl_out = [p for p in places if p[0] in labels_out]
     return pl_in, pl_out
     
 
 def get_matching_places_arcs(curr_tr, places, arcs):
-    place_in, place_out = get_previous_and_next_place(curr_tr, places, arcs)
+    places_in, places_out = get_previous_and_next_places(curr_tr, places, arcs)
     arcs_in = [a for a in arcs if a[1] == curr_tr[0]]
     arcs_out = [a for a in arcs if a[0] == curr_tr[0]]
-    return place_in, place_out, arcs_in[0], arcs_out[0]
+    return places_in, places_out, arcs_in, arcs_out
     
 
 def add_XOR(transitions, places, arcs, chance_add_split, transition, reduce_chance):
-    pl_in, pl_out, arc_in, arc_out = get_matching_places_arcs(transition, places, arcs)
+    places_in, places_out, arcs_in, arcs_out = get_matching_places_arcs(transition, places, arcs)
+    
     tr1 = (transition[0]+'-1', transition[1])
     tr2 = (transition[0]+'-2', transition[1])        
     for i in range(0, len(transitions)):
@@ -138,25 +139,33 @@ def add_XOR(transitions, places, arcs, chance_add_split, transition, reduce_chan
             transitions[i] = tr1
             transitions.insert(i+1, tr2)
     #XOR so no need to replace the places
-    arc_in1 = (pl_in[0], tr1[0])
-    arc_in2 = (pl_in[0], tr2[0])
-    arc_out1 = (tr1[0], pl_out[0])
-    arc_out2 = (tr2[0], pl_out[0])
-    for i in range(0, len(arcs)):
-        if arcs[i] == arc_in:
-            arcs[i] = arc_in1
-            arcs.insert(i+1, arc_in2)
-        if arcs[i] == arc_out:
-            arcs[i] = arc_out1
-            arcs.insert(i+1, arc_out2)
+    
+    for pl_in in places_in:
+        arc_in1 = (pl_in[0], tr1[0])
+        arc_in2 = (pl_in[0], tr2[0])
+        curr_arc_in = [a for a in arcs_in if a[0] == pl_in[0]][0]
+        for i in range(0, len(arcs)):
+            if arcs[i] == curr_arc_in:
+                arcs[i] = arc_in1
+                arcs.insert(i+1, arc_in2)
+    for pl_out in places_out:
+        arc_out1 = (tr1[0], pl_out[0])
+        arc_out2 = (tr2[0], pl_out[0])
+        curr_arc_out = [a for a in arcs_out if a[1] == pl_out[0]][0]
+        for i in range(0, len(arcs)):
+            if arcs[i] == curr_arc_out:
+                arcs[i] = arc_out1
+                arcs.insert(i+1, arc_out2)
     #recursivily so another chance to add a split
     if reduce_chance == True:
         chance_add_split = chance_add_split/2
     a1 = random.random()
     a2 = random.random()
     if a1 < chance_add_split:
+        #print("adding recursive XOR")
         (transitions, places, arcs) = add_XOR(transitions, places, arcs, chance_add_split, tr1, reduce_chance)
     if a2 < chance_add_split:
+        #print("adding recursive XOR")
         (transitions, places, arcs) = add_XOR(transitions, places, arcs, chance_add_split, tr2, reduce_chance)
     return (transitions, places, arcs)
 
@@ -164,28 +173,46 @@ def add_XOR(transitions, places, arcs, chance_add_split, transition, reduce_chan
 def add_XORs(transitions, places, arcs, chance_add_split, reduce_chance=True):
     original_transitions = copy.deepcopy(transitions)
     for tr in original_transitions:
-        if (len(tr[1])==1) and ('split' not in tr[0]) and ('join' not in tr[0]): #only transitions with only one object type and we don't want split and joins of AND constructions
+        #if (len(tr[1])==1) and ('split' not in tr[0]) and ('join' not in tr[0]): #only transitions with only one object type and we don't want split and joins of AND constructions
+        if ('start' not in tr[0]) and ('end' not in tr[0]) and ('split' not in tr[0]) and ('join' not in tr[0]):
             a = random.random()
             if a < chance_add_split:
+                #print("adding XOR")
                 (transitions, places, arcs) = add_XOR(transitions, places, arcs, chance_add_split, tr, reduce_chance)
     return (transitions, places, arcs)
 
 
 
 def get_matching_places_arcs_and(curr_tr,transitions, places, arcs):
-    place_in, place_out = get_previous_and_next_place(curr_tr, places, arcs)
-    arc_in = [a for a in arcs if a[1] == curr_tr[0]][0]
-    arc_out = [a for a in arcs if a[0] == curr_tr[0]][0]
-    arc_inin = [a for a in arcs if a[1] == place_in[0]][0]
-    arc_outout = [a for a in arcs if a[0] == place_out[0]][0]
-    prev_tr = [t for t in transitions if t[0] == arc_inin[0]][0]
-    next_tr = [t for t in transitions if t[0] == arc_outout[1]][0]
-    return place_in, place_out, arc_in, arc_out, arc_inin, arc_outout, prev_tr, next_tr
-    
+    places_in, places_out = get_previous_and_next_places(curr_tr, places, arcs)
+    arcs_in = [a for a in arcs if a[1] == curr_tr[0]]
+    arcs_out = [a for a in arcs if a[0] == curr_tr[0]]
+    arcs_inin = []
+    for pl_in in places_in:
+        arcs_inin += [a for a in arcs if a[1] == pl_in[0]]
+    arcs_outout = []
+    for pl_out in places_out:
+        arcs_outout += [a for a in arcs if a[1] == pl_out[0]]
+    prev_transitions = []
+    for arc in arcs_inin:
+        prev_transitions += [t for t in transitions if t[0] == arc[0]]
+    next_transitions = []
+    for arc in arcs_outout:
+        next_transitions += [t for t in transitions if t[0] == arc[1]]
+    return places_in, places_out, arcs_in, arcs_out, arcs_inin, arcs_outout, prev_transitions, next_transitions
+
+def get_arcs_in(pl_in, arcs):
+    arcs_in = [a for a in arcs if a[0] == pl_in[0]]
+    arcs_inin = [a for a in arcs if a[1] == pl_in[0]]
+    return arcs_inin[0], arcs_in[0]
+
+def get_arcs_out(pl_out, arcs):
+    arcs_out = [a for a in arcs if a[1] == pl_out[0]]
+    arcs_outout = [a for a in arcs if a[0] == pl_out[0]]
+    return arcs_outout[0], arcs_out[0]
 
 def add_AND(transitions, places, arcs, chance_add_split, transition, reduce_chance):
-
-    pl_in, pl_out, arc_in, arc_out, arc_inin, arc_outout, prev_tr, next_tr = get_matching_places_arcs_and(transition,transitions, places, arcs)
+    places_in, places_out = get_previous_and_next_places(transition, places, arcs)
     
     tr_split = (transition[0]+'-split', transition[1])
     tr1 = (transition[0]+'-1', transition[1])
@@ -198,75 +225,86 @@ def add_AND(transitions, places, arcs, chance_add_split, transition, reduce_chan
             transitions.insert(i+1, tr1)
             transitions.insert(i+2, tr2)
             transitions.insert(i+3, tr_join)
-    #AND so we need to replace the places
-    pl_split = (pl_in[0]+'-split', pl_in[1], pl_in[2])
-    pl_in1 = (pl_in[0]+'-split-1', pl_in[1], pl_in[2])
-    pl_in2 = (pl_in[0]+'-split-2', pl_in[1], pl_in[2])
-    pl_out1 = (pl_in[0]+'-join-1', pl_in[1], pl_in[2])
-    pl_out2 = (pl_in[0]+'-join-2', pl_in[1], pl_in[2])
-    pl_join = (pl_out[0], pl_out[1], pl_out[2])
- 
-    for i in range(0, len(places)):
-        if places[i] == pl_in:
-            places[i] = copy.copy(pl_split)
-            places.insert(i+1, pl_in1)
-            places.insert(i+2, pl_in2)
-    for i in range(0, len(places)):
-        if places[i] == pl_out:
-            places[i] = copy.copy(pl_out1)
-            places.insert(i+1, pl_out2)
-            places.insert(i+2, pl_join)
+            
+    for pl_in in places_in:
+        #♣pl_split = (pl_in[0]+'-split', pl_in[1], pl_in[2])
+        pl_in1 = (pl_in[0]+'-split-1', pl_in[1], pl_in[2])
+        pl_in2 = (pl_in[0]+'-split-2', pl_in[1], pl_in[2])
 
-    arc_split_in = (prev_tr[0], pl_split[0])
-    arc_split_out = (pl_split[0], tr_split[0])
-    arc_inin1 = (tr_split[0], pl_in1[0])
-    arc_inin2 = (tr_split[0], pl_in2[0])
-    arc_in1 = (pl_in1[0], tr1[0])
-    arc_in2 = (pl_in2[0], tr2[0])
-    arc_out1 = (tr1[0], pl_out1[0])
-    arc_out2 = (tr2[0], pl_out2[0])
-    arc_outout1 = (pl_out1[0], tr_join[0])
-    arc_outout2 = (pl_out2[0], tr_join[0])
-    arc_join_in = (tr_join[0], pl_join[0])
-    arc_join_out = (pl_join[0], next_tr[0])
-    
-    for i in range(0, len(arcs)):
-        if arcs[i] == arc_inin:
-            arcs[i] = copy.copy(arc_split_in)
-            arcs.insert(i+1, arc_split_out)
-            arcs.insert(i+2, arc_inin1)
-            arcs.insert(i+3, arc_inin2)
-    for i in range(0, len(arcs)):
-        if arcs[i] == arc_in:
-            arcs[i] = copy.copy(arc_in1)
-            arcs.insert(i+1, arc_in2)
-    for i in range(0, len(arcs)):
-        if arcs[i] == arc_out:
-            arcs[i] = copy.copy(arc_out1)
-            arcs.insert(i+1, arc_out2)
-    for i in range(0, len(arcs)):
-        if arcs[i] == arc_outout:
-            arcs[i] = copy.copy(arc_outout1)
-            arcs.insert(i+1, arc_outout2)
-            arcs.insert(i+2, arc_join_in)
-            arcs.insert(i+3, arc_join_out)
+        for i in range(0, len(places)):
+            if places[i] == pl_in:
+                #places[i] = copy.copy(pl_split)
+                places.insert(i+1, pl_in1)
+                places.insert(i+2, pl_in2)
+        arc_inin, arc_in = get_arcs_in(pl_in, arcs)
+        #prev_tr = [t for t in transitions if t[0] == arc_inin[0]][0]
+        #arc_split_in = (prev_tr[0], pl_split[0])
+        #arc_split_out = (pl_split[0], tr_split[0])
+        arc_split_out = (pl_in[0], tr_split[0])
+        arc_inin1 = (tr_split[0], pl_in1[0])
+        arc_inin2 = (tr_split[0], pl_in2[0])
+        arc_in1 = (pl_in1[0], tr1[0])
+        arc_in2 = (pl_in2[0], tr2[0])
+        for i in range(0, len(arcs)):
+            if arcs[i] == arc_inin:
+                #arcs[i] = copy.copy(arc_split_in)
+                arcs.insert(i+1, arc_split_out)
+                arcs.insert(i+2, arc_inin1)
+                arcs.insert(i+3, arc_inin2)
+        for i in range(0, len(arcs)):
+            if arcs[i] == arc_in:
+                arcs[i] = copy.copy(arc_in1)
+                arcs.insert(i+1, arc_in2)            
+    for pl_out in places_out:
+        pl_out1 = (pl_out[0]+'-join-1', pl_out[1], pl_out[2])
+        pl_out2 = (pl_out[0]+'-join-2', pl_out[1], pl_out[2])
+        #pl_join = (pl_out[0], pl_out[1], pl_out[2])
+        for i in range(0, len(places)):
+            if places[i] == pl_out:
+                #places[i] = copy.copy(pl_out1)
+                places.insert(i, pl_out1)
+                places.insert(i+1, pl_out2)
+                #places.insert(i+2, pl_join)
+        arc_outout, arc_out = get_arcs_out(pl_out, arcs)
+        #next_tr = [t for t in transitions if t[0] == arc_outout[1]][0]
+        arc_out1 = (tr1[0], pl_out1[0])
+        arc_out2 = (tr2[0], pl_out2[0])
+        arc_outout1 = (pl_out1[0], tr_join[0])
+        arc_outout2 = (pl_out2[0], tr_join[0])
+        #arc_join_in = (tr_join[0], pl_join[0])
+        arc_join_in = (tr_join[0], pl_out[0])
+        #arc_join_out = (pl_join[0], next_tr[0])
+        for i in range(0, len(arcs)):
+            if arcs[i] == arc_out:
+                arcs[i] = copy.copy(arc_out1)
+                arcs.insert(i+1, arc_out2)
+        for i in range(0, len(arcs)):
+            if arcs[i] == arc_outout:
+                arcs.insert(i, arc_outout1)
+                arcs.insert(i+1, arc_outout2)
+                arcs.insert(i+2, arc_join_in)
+                #arcs.insert(i+3, arc_join_out)
     #recursivily so another chance to add a split
     if reduce_chance == True:
         chance_add_split = chance_add_split/2
     a1 = random.random()
     a2 = random.random()
     if a1 < chance_add_split:
+        #print("adding recursive and")
         (transitions, places, arcs) = add_AND(transitions, places, arcs, chance_add_split, tr1, reduce_chance)
     if a2 < chance_add_split:
+        #print("adding recursive and")
         (transitions, places, arcs) = add_AND(transitions, places, arcs, chance_add_split, tr2, reduce_chance)
     return (transitions, places, arcs)
     
 def add_ANDs(transitions, places, arcs, chance_add_split, reduce_chance=True):
     original_transitions = copy.deepcopy(transitions)
     for tr in original_transitions:
-        if (len(tr[1])==1) and ('split' not in tr[0]) and ('join' not in tr[0]): #only transitions with only one object type and we don't want split and joins of AND constructions
+        #if (len(tr[1])==1) and ('split' not in tr[0]) and ('join' not in tr[0]): #only transitions with only one object type and we don't want split and joins of AND constructions
+        if ('start' not in tr[0]) and ('end' not in tr[0]) and ('split' not in tr[0]) and ('join' not in tr[0]):
             a = random.random()
             if a < chance_add_split:
+                #print("add and")
                 (transitions, places, arcs) = add_AND(transitions, places, arcs, chance_add_split, tr, reduce_chance)
     return (transitions, places, arcs)
 
@@ -304,5 +342,4 @@ def generate_net(num_act, num_ot, interconnectedness, chance_add_AND, chance_add
     #gviz = ocpn_vis_factory.apply(model, parameters={'format': 'svg'})
     #ocpn_vis_factory.view(gviz)
     return model
-
 
