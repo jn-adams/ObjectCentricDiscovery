@@ -204,14 +204,14 @@ def get_matching_places_arcs_and(curr_tr,transitions, places, arcs):
 def get_arcs_in(pl_in, arcs):
     arcs_in = [a for a in arcs if a[0] == pl_in[0]]
     arcs_inin = [a for a in arcs if a[1] == pl_in[0]]
-    print(len(arcs_in), len(arcs_inin))
+    #print(len(arcs_in), len(arcs_inin))
 
     return arcs_inin[0], arcs_in[0]
 
 def get_arcs_out(pl_out, arcs):
     arcs_out = [a for a in arcs if a[1] == pl_out[0]]
     arcs_outout = [a for a in arcs if a[0] == pl_out[0]]
-    print(len(arcs_out), len(arcs_outout))
+    #print(len(arcs_out), len(arcs_outout))
 
     return arcs_outout[0], arcs_out[0]
 
@@ -323,9 +323,7 @@ def generate_net(num_act, num_ot, interconnectedness, chance_add_AND, chance_add
     for t in model.transitions:
         if "split" in t.name or "join" in t.name:
             t.silent = True
-    gviz = ocpn_vis_factory.apply(model, parameters={'format': 'svg'})
-    ocpn_vis_factory.view(gviz)
+    #gviz = ocpn_vis_factory.apply(model, parameters={'format': 'svg'})
+    #ocpn_vis_factory.view(gviz)
     return model
 
-for i in range(0,15):
-    generate_net(10, 3, 0.4, 0.4, 0.4)
