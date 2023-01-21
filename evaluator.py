@@ -80,7 +80,7 @@ def generate_example_models(params_list,interc_vals,con_vals,epsilon_i,epsilon_c
         (intercon, sample_rate, num_ot, num_act, chance_and, chance_xor) = params
         net = gen.generate_net(num_act=num_act, num_ot=num_ot, interconnectedness=intercon, chance_add_AND=chance_and,
                                chance_add_XOR=chance_xor)
-        if len([t for t in net.transitions if not t.silent]) > 12:
+        if len([t for t in net.transitions if not t.silent]) > 8:
             continue
         interconnectedness = stats.get_interconnectivity(net, False)
         for i_val in interc_vals:
@@ -90,7 +90,7 @@ def generate_example_models(params_list,interc_vals,con_vals,epsilon_i,epsilon_c
                 model_too_small = False
                 for ot in net.object_types:
                     sum_complexity.append(complexity_d[ot])
-                    if complexity_d[ot+"_act"] < 6:
+                    if complexity_d[ot+"_act"] < 4:
                         model_too_small = True
                 if model_too_small:
                     continue
