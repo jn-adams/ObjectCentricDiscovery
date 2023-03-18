@@ -46,7 +46,7 @@ def get_next_state(ocpn, state, activity):
     time_cp += time.time() - ti
     for t in ocpn.transitions:
         if t.name == activity:
-            #store whihc tokens of which type in in places
+            #store which tokens of which type in in places
             token_dict = {}
             for a in t.in_arcs:
                 p = a.source
@@ -104,7 +104,6 @@ def enumerate_ocpn(ocpn):
     trace_set = set()
     trace_set_only_traces = set()
     state_hashes = set()
-    #could be extended with acheck for already added
     state_queue = []
     state_queue.append(initial_state)
     dfs = 0

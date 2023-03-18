@@ -8,8 +8,6 @@ import get_stats as stats
 def eval_params(params):
     (intercon, sample_rate, num_ot, num_act,chance_and,chance_xor) = params
     # generate a model
-    # net = gen.generate_net(num_act=20,num_ot=5, interconnectedness=0.2)
-    # things missing: Replacement of activities by choice or parallel constructs and making sure that the net is conencted(can also be  covered by high enough interconnectedness)
     net = gen.generate_net(num_act=num_act, num_ot=num_ot, interconnectedness=intercon, chance_add_AND=chance_and,
                            chance_add_XOR=chance_xor)
     if len([t for t in net.transitions if not t.silent]) > 8:
@@ -80,13 +78,14 @@ def generate_example_models(params_list,interc_vals,con_vals,epsilon_i,epsilon_c
         (intercon, sample_rate, num_ot, num_act, chance_and, chance_xor) = params
         net = gen.generate_net(num_act=num_act, num_ot=num_ot, interconnectedness=intercon, chance_add_AND=chance_and,
                                chance_add_XOR=chance_xor)
-        if len([t for t in net.transitions if not t.silent]) > 8:
+        if len([t for t in net.transitions if not t.silent]) < 8 or len([t for t in net.transitions if not t.silent]) > 8 :
             continue
         interconnectedness = stats.get_interconnectivity(net, False)
         for i_val in interc_vals:
             if i_val - epsilon_i < interconnectedness and i_val + epsilon_i > interconnectedness:
                 sum_complexity= []
                 complexity_d = stats.get_complexity_per_object(net)
+                print(complexity_d)
                 model_too_small = False
                 for ot in net.object_types:
                     sum_complexity.append(complexity_d[ot])
@@ -96,7 +95,7 @@ def generate_example_models(params_list,interc_vals,con_vals,epsilon_i,epsilon_c
                     continue
                 complexity = sum(sum_complexity) / len(sum_complexity)
 
-
+                print(complexity)
                 for c_val in con_vals:
                     if c_val - epsilon_c < complexity and c_val + epsilon_c > complexity:
                         return_dict[(i_val,c_val)] = net

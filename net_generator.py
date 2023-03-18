@@ -1,13 +1,3 @@
-#for now does not allow silent activities
-#also no replacement of activtiies by constructs yet
-#The chance_overlap x now means we assgn an activty label to one object and then there is an chance x
-#for each other object to also be assigned to that one
-
-#Notes Jari
-# The number of activities does NOT include the common start and end transition now, I think thats fine
-
-# RANDOM BUG that OUT label whhen adding XOR, seems to only be present when low interconnectivity
-
 import string
 
 from enum import Enum
@@ -23,13 +13,9 @@ def get_digit(label): #function to extract the number, not necessary but easier 
     return ''.join(c for c in label if c.isdigit())
 
 def get_labels_activties(num_act):
-    #Edited By Jari with a plus one t not be confusing 
     return ["Activity_"+str(i+1) for i in range(0, num_act)]
 
 def get_timespot_activities(labels_act):
-    #Edited By Jari
-    #dictionary with the original spot activities have on "the timeline"
-    #Changed with a plus one because of start activity
     return dict([(labels_act[i], i) for i in range(0, len(labels_act))])
 
 
@@ -49,7 +35,6 @@ def get_object_types_for_activity(labels_obj, chance_overlap):
     return set(obj_list)
 
 def get_object_types_for_all_activties(labels_act, labels_obj, chance_overlap):
-    #Edited By Jari
     types_act = dict([(labels_act[i], get_object_types_for_activity(labels_obj, chance_overlap)) for i in range(0, len(labels_act))])
     types_act["start"] = set(labels_obj)
     types_act["end"] = set(labels_obj)
@@ -68,7 +53,6 @@ def create_places_activity(label_act, objects_act, timespots):
     return [("Place_"+get_digit(obj)+"_"+get_digit_withexception(label_act, (len(timespots)-1)), obj, timespots[label_act]) for obj in objects_act]
 
 def create_all_places(object_types_for_all_activties, timespots, object_types):
-    #Edited By Jari
     sources =  [("Source_"+get_digit(obj_type), obj_type, 0) for obj_type in object_types]
     new_object_types_for_all_activties = {k: object_types_for_all_activties[k] for k in set(list(object_types_for_all_activties.keys())) - set(["start"])}
     places = [create_places_activity(key, object_types_for_all_activties[key], timespots) for key in new_object_types_for_all_activties]
@@ -79,7 +63,7 @@ def get_all_activities_for_object(obj_type, object_types_for_all_activties):
     return [key for key in object_types_for_all_activties if obj_type in object_types_for_all_activties[key]]
 
 def get_all_arcs_for_object(obj_type, object_types_for_all_activties):
-    #Edited By Jari
+
     relevant_activities = get_all_activities_for_object(obj_type, object_types_for_all_activties)
     transitions = [("Source_"+get_digit(obj_type), relevant_activities[0])] 
     transitions = transitions + [("Place_"+get_digit(obj_type)+"_"+get_digit_withexception(act, (len(object_types_for_all_activties)-1)), act) for act in relevant_activities[1:]]
@@ -100,7 +84,7 @@ def get_simple_net(num_act, num_obj, chance_overlap):
     labels_act = get_labels_activties(num_act)
     labels_obj = get_labels_objecttypes(num_obj)
     
-    #Edited By Jari
+
     labels_act.insert(0, "start")
     labels_act.append("end")
     
@@ -173,7 +157,6 @@ def add_XOR(transitions, places, arcs, chance_add_split, transition, reduce_chan
 def add_XORs(transitions, places, arcs, chance_add_split, reduce_chance=True):
     original_transitions = copy.deepcopy(transitions)
     for tr in original_transitions:
-        #if (len(tr[1])==1) and ('split' not in tr[0]) and ('join' not in tr[0]): #only transitions with only one object type and we don't want split and joins of AND constructions
         if ('start' not in tr[0]) and ('end' not in tr[0]) and ('split' not in tr[0]) and ('join' not in tr[0]):
             a = random.random()
             if a < chance_add_split:
@@ -284,7 +267,6 @@ def add_AND(transitions, places, arcs, chance_add_split, transition, reduce_chan
 def add_ANDs(transitions, places, arcs, chance_add_split, reduce_chance=True):
     original_transitions = copy.deepcopy(transitions)
     for tr in original_transitions:
-        #if (len(tr[1])==1) and ('split' not in tr[0]) and ('join' not in tr[0]): #only transitions with only one object type and we don't want split and joins of AND constructions
         if ('start' not in tr[0]) and ('end' not in tr[0]) and ('split' not in tr[0]) and ('join' not in tr[0]):
             a = random.random()
             if a < chance_add_split:

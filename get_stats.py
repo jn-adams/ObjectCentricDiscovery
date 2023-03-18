@@ -104,8 +104,6 @@ def get_complexity_per_object(ocpn):
     trace_share = {}
     for ot in models.keys():
         model = models[ot]
-        #this is where it goes wrong: as far as I can see the models per object are nicely defined. 
-        #The only problem is that the enumration always gives an empty set
         amount_traces = len(en.enumerate_ocpn(model))
         max_possible_traces = math.factorial(len([t for t in model.transitions if not t.silent])-2)
         trace_share[ot] = amount_traces/max_possible_traces
