@@ -10,4 +10,4 @@ pip install -r requirements.txt
 To re-run the experiment, you can run 
 ```python main.py```
 
-To generate a random process model (with different models) you can use the ```generate_net``` function found in the net_generator.py file.
+You can also seperatly generate a random process model (with different models)by using the ```generate_net``` function found in the net_generator.py file.
