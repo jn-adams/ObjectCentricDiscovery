@@ -7,7 +7,8 @@ Under Python 3.7, use pip to install the requirements
 pip install -r requirements.txt
 ```
 
-To re-run the experiment, you can run 
+To re-run the experiment,sSwitch to the folder of this repository and run
+
 ```python main.py```
 
 You can also seperatly generate a random process model (with different models)by using the ```generate_net``` function found in the net_generator.py file.
